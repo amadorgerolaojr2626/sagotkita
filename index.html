@@ -115,66 +115,67 @@ function authForm(mode){
   });
 }
 
-const questionSets={
-  general:[
-    {q:"Which sentence demonstrates correct subject-verb agreement?",c:["The list of topics are on the table.","The list of topics is on the table.","The list of topics were on the table.","The list of topics have been on the table."],a:1,e:"The subject is 'list,' which is singular. The phrase 'of topics' does not change the subject, so the singular verb 'is' is correct."},
-    {q:"What is the main purpose of a thesis statement in an essay?",c:["To list every source used","To introduce an unrelated idea","To present the central claim or argument","To provide the essay's final sentence"],a:2,e:"A thesis statement presents the central idea or argument that the essay will explain and support."},
-    {q:"What is 25% of 240?",c:["40","50","60","80"],a:2,e:"Convert 25% to 0.25, then multiply 0.25 × 240 = 60."},
-    {q:"Which part of the cell is primarily responsible for producing usable energy (ATP)?",c:["Nucleus","Mitochondrion","Ribosome","Cell wall"],a:1,e:"Mitochondria are the main site of cellular respiration and produce much of the ATP used by the cell."},
-    {q:"In Philippine government, which branch has the primary power to interpret laws?",c:["Executive","Legislative","Judicial","Local government"],a:2,e:"The Judicial branch, led by the Supreme Court, interprets laws and resolves legal controversies."}
-  ],
-  professional:[
-    {q:"Which teaching approach emphasizes learners actively constructing their own understanding?",c:["Constructivism","Perennialism","Behaviorism only","Essentialism"],a:0,e:"Constructivism views learners as active participants who build knowledge by connecting new experiences with prior understanding."},
-    {q:"A teacher uses diagnostic assessment before beginning a lesson. What is its main purpose?",c:["To assign final grades","To identify learners' prior knowledge and needs","To rank teachers","To replace all classroom activities"],a:1,e:"Diagnostic assessment helps identify learners' strengths, misconceptions, and readiness before instruction."},
-    {q:"Which is the best example of formative assessment?",c:["A final examination at the end of the year","A national licensure examination","A short exit ticket used to adjust tomorrow's lesson","A diploma"],a:2,e:"Formative assessment provides feedback during learning so the teacher can adjust instruction and support learners."},
-    {q:"Under learner-centered teaching, the teacher primarily acts as a:",c:["Sole source of all information","Facilitator of learning","Silent observer in every situation","Strict examiner only"],a:1,e:"A learner-centered teacher facilitates, guides, and designs experiences that help learners take an active role."},
-    {q:"Which objective is most measurable?",c:["Understand fractions","Appreciate mathematics","Solve five fraction problems correctly","Know about numbers"],a:2,e:"'Solve five fraction problems correctly' states an observable performance and a clear criterion."}
-  ],
-  science:[
-    {q:"Which process allows green plants to convert light energy into chemical energy?",c:["Respiration","Photosynthesis","Transpiration","Fermentation"],a:1,e:"Photosynthesis uses light energy to convert carbon dioxide and water into glucose, releasing oxygen."},
-    {q:"What is the basic unit of heredity?",c:["Cell","Tissue","Gene","Organ"],a:2,e:"A gene is a segment of DNA that carries hereditary information."},
-    {q:"Which force keeps planets in orbit around the Sun?",c:["Friction","Magnetism","Gravity","Buoyancy"],a:2,e:"The Sun's gravitational attraction provides the force that keeps planets in their orbits."},
-    {q:"A substance with a pH of 3 is best described as:",c:["Acidic","Neutral","Basic","Always pure water"],a:0,e:"Values below 7 are acidic, 7 is neutral, and values above 7 are basic under standard conditions."},
-    {q:"Which organ filters wastes from the blood and produces urine?",c:["Lungs","Kidneys","Stomach","Pancreas"],a:1,e:"The kidneys filter blood, remove wastes and excess water, and produce urine."}
-  ]
-};
 let activeQuestions=[],questionIndex=0,score=0,answered=false,activeSubject='';
+const subjectNames={general:'General Education',professional:'Professional Education',science:'Science Major'};
+const subjectKeys={general:'General Education',professional:'Professional Education',science:'Science Major'};
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function openPracticeTest(){
   title.textContent='LET Practice Test';
-  description.textContent='Choose a subject to begin. This starter quiz contains five sample questions per subject.';
-  body.innerHTML=`<div class="quiz-intro"><strong>How it works</strong><p style="margin:5px 0 0">Answer each question, read the explanation, and see your score at the end. You can try again anytime.</p></div><div class="quiz-subjects">
+  description.textContent='Choose a subject to begin. Questions are loaded from the SagotKita question bank.';
+  body.innerHTML=`<div class="quiz-intro"><strong>How it works</strong><p style="margin:5px 0 0">Answer each question, review the explanation after submitting, and see your score at the end.</p></div><div class="quiz-subjects">
     <button class="quiz-subject" data-subject="general"><span>📘 General Education<small>Language, Mathematics, Science, and Civics</small></span><span>›</span></button>
     <button class="quiz-subject" data-subject="professional"><span>🎓 Professional Education<small>Teaching principles and assessment</small></span><span>›</span></button>
     <button class="quiz-subject" data-subject="science"><span>🧪 Science Major<small>Biology, chemistry, and physics</small></span><span>›</span></button>
-  </div><div class="quiz-note">These are starter practice questions created for SagotKita. They are not official PRC examination questions.</div>`;
+  </div><div class="quiz-note">Answer keys are checked by the database and are not downloaded with the questions.</div><div class="quiz-feedback" id="loadFeedback" aria-live="polite"></div>`;
   body.querySelectorAll('[data-subject]').forEach(button=>button.addEventListener('click',()=>startQuiz(button.dataset.subject)));
-  backdrop.classList.add('open');
-  document.getElementById('modalClose').focus();
+  backdrop.classList.add('open');document.getElementById('modalClose').focus();
 }
-function startQuiz(subject){
-  activeSubject=subject;activeQuestions=questionSets[subject];questionIndex=0;score=0;answered=false;
-  renderQuestion();
+async function startQuiz(subject){
+  activeSubject=subject;questionIndex=0;score=0;answered=false;activeQuestions=[];
+  title.textContent=subjectNames[subject]+' Practice';description.textContent='Loading questions…';
+  body.innerHTML='<p role="status">Loading questions from the question bank…</p>';
+  try{
+    const {data,error}=await supabaseClient.rpc('get_practice_questions',{p_subject:subjectKeys[subject],p_limit:30});
+    if(error)throw error;
+    if(!Array.isArray(data)||data.length===0){body.innerHTML='<div class="quiz-intro">No questions are available for this subject yet. Please try another subject later.</div><button class="btn btn-secondary" id="backSubjects" type="button">Choose Subject</button>';document.getElementById('backSubjects').addEventListener('click',openPracticeTest);return}
+    activeQuestions=data.map(row=>({id:row.id,q:row.question,c:[row.choice_a,row.choice_b,row.choice_c,row.choice_d]}));
+    renderQuestion();
+  }catch(error){
+    body.innerHTML=`<div class="quiz-feedback show wrong">Could not load questions. ${escapeHtml(error.message||'Please try again.')}</div><button class="btn btn-secondary" id="backSubjects" type="button">Back</button>`;
+    document.getElementById('backSubjects').addEventListener('click',openPracticeTest);
+  }
 }
 function renderQuestion(){
-  const q=activeQuestions[questionIndex];const subjectNames={general:'General Education',professional:'Professional Education',science:'Science Major'};
-  title.textContent=subjectNames[activeSubject]+' Practice';
-  description.textContent='Choose the best answer for each question.';
-  body.innerHTML=`<div class="quiz-meta"><span>Question ${questionIndex+1} of ${activeQuestions.length}</span><span>Score: ${score}</span></div><div class="quiz-progress"><span style="width:${(questionIndex/activeQuestions.length)*100}%"></span></div><div class="quiz-question">${q.q}</div><div class="quiz-choices">${q.c.map((choice,i)=>`<button class="quiz-choice" type="button" data-answer="${i}">${String.fromCharCode(65+i)}. ${choice}</button>`).join('')}</div><div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div><div class="quiz-actions"><button class="btn btn-secondary" id="exitQuiz" type="button">Exit quiz</button><button class="btn btn-primary" id="nextQuestion" type="button" disabled>${questionIndex===activeQuestions.length-1?'See Results':'Next Question'}</button></div><div class="quiz-note">Select one answer. Your answer cannot be changed after selection.</div>`;
+  const q=activeQuestions[questionIndex];
+  body.innerHTML=`<div class="quiz-meta"><span>Question ${questionIndex+1} of ${activeQuestions.length}</span><span>Score: ${score}</span></div><div class="quiz-progress"><span style="width:${(questionIndex/activeQuestions.length)*100}%"></span></div><div class="quiz-question">${escapeHtml(q.q)}</div><div class="quiz-choices">${q.c.map((choice,i)=>`<button class="quiz-choice" type="button" data-answer="${i}">${String.fromCharCode(65+i)}. ${escapeHtml(choice)}</button>`).join('')}</div><div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div><div class="quiz-actions"><button class="btn btn-secondary" id="exitQuiz" type="button">Exit quiz</button><button class="btn btn-primary" id="nextQuestion" type="button" disabled>${questionIndex===activeQuestions.length-1?'See Results':'Next Question'}</button></div><div class="quiz-note">Select one answer. Your answer cannot be changed after submission.</div>`;
   body.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>selectAnswer(Number(button.dataset.answer))));
   document.getElementById('exitQuiz').addEventListener('click',openPracticeTest);
-  document.getElementById('nextQuestion').addEventListener('click',()=>{if(questionIndex<activeQuestions.length-1){questionIndex++;renderQuestion()}else{renderResults()}});
+  document.getElementById('nextQuestion').addEventListener('click',()=>{if(questionIndex<activeQuestions.length-1){questionIndex++;answered=false;renderQuestion()}else renderResults()});
 }
-function selectAnswer(selected){
-  if(answered)return;answered=true;const q=activeQuestions[questionIndex];const correct=selected===q.a;if(correct)score++;
-  body.querySelectorAll('[data-answer]').forEach(button=>{const n=Number(button.dataset.answer);button.disabled=true;if(n===q.a)button.classList.add('correct');else if(n===selected)button.classList.add('wrong')});
-  const feedback=document.getElementById('quizFeedback');feedback.className='quiz-feedback show '+(correct?'correct':'wrong');feedback.innerHTML=`<strong>${correct?'Correct!':'Not quite.'}</strong> ${q.e}`;
-  document.getElementById('nextQuestion').disabled=false;
-  document.querySelector('.quiz-meta span:last-child').textContent='Score: '+score;
+async function selectAnswer(selected){
+  if(answered)return;answered=true;
+  const q=activeQuestions[questionIndex];const answer=String.fromCharCode(65+selected);
+  const buttons=[...body.querySelectorAll('[data-answer]')];buttons.forEach(button=>button.disabled=true);
+  const feedback=document.getElementById('quizFeedback');feedback.className='quiz-feedback show';feedback.textContent='Checking answer…';
+  try{
+    const {data,error}=await supabaseClient.rpc('submit_practice_answer',{p_question_id:q.id,p_answer:answer});
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(!result)throw new Error('The answer checker returned no result.');
+    if(result.is_correct)score++;
+    buttons.forEach(button=>{const n=Number(button.dataset.answer);if(String.fromCharCode(65+n)===result.correct_answer)button.classList.add('correct');else if(n===selected)button.classList.add('wrong')});
+    feedback.className='quiz-feedback show '+(result.is_correct?'correct':'wrong');
+    feedback.textContent=(result.is_correct?'Correct! ':'Not quite. Correct answer: '+result.correct_answer+'. ')+(result.explanation||'');
+    document.getElementById('nextQuestion').disabled=false;
+    document.querySelector('.quiz-meta span:last-child').textContent='Score: '+score;
+  }catch(error){
+    answered=false;buttons.forEach(button=>button.disabled=false);feedback.className='quiz-feedback show wrong';feedback.textContent='Could not check this answer. Please try again. '+(error.message||'');
+  }
 }
 function renderResults(){
-  const total=activeQuestions.length;const percent=Math.round(score/total*100);let message=percent>=80?'Excellent work! Keep strengthening your knowledge.':percent>=60?'Good effort! Review the explanations and try again.':'Keep practicing. Every attempt is a chance to improve.';
-  title.textContent='Practice Test Results';description.textContent='You have completed the '+({general:'General Education',professional:'Professional Education',science:'Science Major'}[activeSubject])+' practice test.';
-  body.innerHTML=`<div class="quiz-result"><div style="font-size:48px">${percent>=80?'🏆':percent>=60?'👏':'📚'}</div><div class="quiz-score">${score} / ${total}</div><strong>${percent}% correct</strong><p>${message}</p></div><div class="quiz-intro"><strong>Your result</strong><p style="margin:5px 0 0">Correct answers: ${score}<br>Incorrect answers: ${total-score}<br>Total questions: ${total}</p></div><div class="quiz-actions"><button class="btn btn-secondary" id="chooseSubject" type="button">Choose Subject</button><button class="btn btn-primary" id="retryQuiz" type="button">Try Again</button></div><div class="quiz-note">Your score is shown in this session only. Saving progress to your account will be added in a later development step.</div>`;
+  const total=activeQuestions.length;const percent=Math.round(score/total*100);const message=percent>=80?'Excellent work! Keep strengthening your knowledge.':percent>=60?'Good effort! Review the explanations and try again.':'Keep practicing. Every attempt is a chance to improve.';
+  title.textContent='Practice Test Results';description.textContent='You have completed the '+subjectNames[activeSubject]+' practice test.';
+  body.innerHTML=`<div class="quiz-result"><div style="font-size:48px">${percent>=80?'🏆':percent>=60?'👏':'📚'}</div><div class="quiz-score">${score} / ${total}</div><strong>${percent}% correct</strong><p>${message}</p></div><div class="quiz-intro"><strong>Your result</strong><p style="margin:5px 0 0">Correct answers: ${score}<br>Incorrect answers: ${total-score}<br>Total questions: ${total}</p></div><div class="quiz-actions"><button class="btn btn-secondary" id="chooseSubject" type="button">Choose Subject</button><button class="btn btn-primary" id="retryQuiz" type="button">Try Again</button></div><div class="quiz-note">Your score is shown in this session only. Progress saving is not included in this version.</div>`;
   document.getElementById('chooseSubject').addEventListener('click',openPracticeTest);
   document.getElementById('retryQuiz').addEventListener('click',()=>startQuiz(activeSubject));
 }
