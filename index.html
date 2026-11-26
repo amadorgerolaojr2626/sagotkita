@@ -86,6 +86,85 @@ body{margin:0;background:#eef3fa;font-family:Arial,Helvetica,sans-serif;color:#1
 <button class="hotspot footer-editorial" aria-label="Editorial Policy" data-title="Editorial Policy" data-message="The editorial policy page will explain how review content is checked."></button>
 <button class="hotspot footer-disclaimer" aria-label="Disclaimer" data-title="Disclaimer" data-message="The disclaimer page will be added before public launch."></button>
 </main>
+
+<style>
+/* Mobile homepage: a real stacked layout for phones */
+.mobile-home{display:none}
+@media (max-width:700px){
+  body{background:#f2f6fc}
+  .page{display:none}
+  .mobile-home{display:block;max-width:560px;margin:0 auto;background:#f4f7fc;min-height:100vh;overflow:hidden;color:#102b59}
+  .mobile-header{background:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 10px rgba(8,45,104,.08);position:relative;z-index:1}
+  .mobile-brand{font-size:23px;font-weight:900;letter-spacing:-1px;color:#082d68}
+  .mobile-brand span{color:#08aaa9}
+  .mobile-nav{display:flex;gap:7px;overflow-x:auto;padding:10px 14px;background:#fff;white-space:nowrap;scrollbar-width:none}
+  .mobile-nav::-webkit-scrollbar{display:none}
+  .mobile-action{font:inherit;border:0;cursor:pointer;border-radius:12px;padding:11px 14px;background:#fff;color:#082d68;font-weight:700;box-shadow:0 2px 9px rgba(8,45,104,.10);transition:background .18s,color .18s,transform .18s;min-height:42px}
+  .mobile-action:hover,.mobile-action:focus-visible{background:#e3e7ec;color:#082d68;outline:2px solid #aeb8c5}
+  .mobile-action:active{transform:scale(.98);background:#d7dde5}
+  .mobile-nav .mobile-action{padding:9px 12px;box-shadow:none;background:#f0f5fb;font-size:13px}
+  .mobile-nav .mobile-action:hover{background:#dfe4eb}
+  .mobile-hero{padding:30px 20px 26px;background:linear-gradient(135deg,#082d68,#07518b 62%,#08aaa9);color:#fff}
+  .mobile-hero h1{font-size:clamp(32px,9vw,46px);line-height:1.02;margin:0 0 13px;font-weight:900;letter-spacing:-1.2px}
+  .mobile-hero h1 span{color:#16e0d5}
+  .mobile-hero p{font-size:15px;line-height:1.5;margin:0 0 20px;color:#edf7ff}
+  .mobile-hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .mobile-hero-actions .mobile-action{font-size:13px;padding:12px 9px;background:#13d0c8;color:#052b55}
+  .mobile-hero-actions .mobile-action.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.8);box-shadow:none}
+  .mobile-section{padding:19px 14px 2px}
+  .mobile-section h2{font-size:20px;margin:0 0 12px;color:#082d68}
+  .mobile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mobile-tile{background:#fff;border-radius:15px;padding:15px 12px;box-shadow:0 3px 12px rgba(8,45,104,.09);min-width:0}
+  .mobile-tile h3{font-size:15px;line-height:1.25;margin:0 0 6px;color:#082d68}
+  .mobile-tile p{font-size:12px;line-height:1.4;margin:0 0 11px;color:#53677f}
+  .mobile-tile .mobile-action{width:100%;font-size:12px;padding:10px 8px;background:#edf5ff;box-shadow:none}
+  .mobile-feature{border-radius:16px;padding:17px;background:linear-gradient(120deg,#08aaa9,#00c9c0);color:#fff;margin-bottom:10px}
+  .mobile-feature.dark{background:linear-gradient(120deg,#082d68,#07518b)}
+  .mobile-feature h3{font-size:18px;margin:0 0 7px}
+  .mobile-feature p{font-size:13px;line-height:1.45;margin:0 0 13px}
+  .mobile-feature .mobile-action{background:#fff;color:#082d68;box-shadow:none}
+  .mobile-footer{margin-top:22px;padding:22px 16px;background:#082d68;color:#fff;text-align:center}
+  .mobile-footer strong{font-size:20px}
+  .mobile-footer p{font-size:12px;line-height:1.6;color:#dceaff}
+  .mobile-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
+  .mobile-footer-links .mobile-action{font-size:11px;padding:8px 10px;min-height:34px}
+  .modal-backdrop{padding:16px}
+}
+@media(max-width:360px){.mobile-grid{grid-template-columns:1fr}.mobile-hero-actions{grid-template-columns:1fr}}
+</style>
+<div class="mobile-home" aria-label="SagotKita mobile homepage">
+  <header class="mobile-header"><div class="mobile-brand">Sagot<span>Kita</span></div><button class="mobile-action" data-title="Log In" data-message="The login form and user accounts have not been connected yet.">Log In</button></header>
+  <nav class="mobile-nav" aria-label="Main navigation">
+    <button class="mobile-action" data-title="Home" data-message="You are viewing the SagotKita homepage.">Home</button>
+    <button class="mobile-action" data-title="LET Reviewers" data-message="Browse General Education, Professional Education, and Major reviewers.">Reviewers</button>
+    <button class="mobile-action" data-title="Question Bank" data-message="The question bank section will open here when the content system is connected.">Questions</button>
+    <button class="mobile-action" data-title="Practice Tests" data-message="Practice tests will be available here once the exam system is connected.">Practice</button>
+    <button class="mobile-action" data-title="Mock Exams" data-message="Timed mock examinations will be available here once the exam system is connected.">Mock Exams</button>
+    <button class="mobile-action" data-title="Study Resources" data-message="Study guides and downloadable resources will be listed here.">Resources</button>
+    <button class="mobile-action" data-title="AI Tutor" data-message="The AI Tutor needs to be connected to its backend before it can answer questions.">AI Tutor</button>
+  </nav>
+  <section class="mobile-hero"><h1>Your LET Success <span>Starts Here!</span></h1><p>SagotKita helps aspiring Filipino teachers prepare, practice, and pass the Licensure Examination for Professional Teachers.</p><div class="mobile-hero-actions"><button class="mobile-action" data-title="Start Reviewing" data-message="Choose a reviewer category to begin.">Start Reviewing</button><button class="mobile-action secondary" data-title="Practice Test" data-message="The practice test interface is not connected yet.">Take a Practice Test</button></div></section>
+  <section class="mobile-section"><h2>LET Preparation Categories</h2><div class="mobile-grid">
+    <article class="mobile-tile"><h3>General Education</h3><p>Language, Math, Science, and more.</p><button class="mobile-action" data-title="General Education" data-message="General Education reviewer materials will appear in this section.">Explore</button></article>
+    <article class="mobile-tile"><h3>Professional Education</h3><p>Teaching strategies, curriculum, and more.</p><button class="mobile-action" data-title="Professional Education" data-message="Professional Education reviewer materials will appear in this section.">Explore</button></article>
+    <article class="mobile-tile"><h3>Specialization / Major</h3><p>Math, English, Science, and other majors.</p><button class="mobile-action" data-title="Specialization / Major" data-message="Choose your LET specialization to see relevant reviewer materials.">Explore</button></article>
+    <article class="mobile-tile"><h3>Question Bank</h3><p>Review practice questions by topic.</p><button class="mobile-action" data-title="Question Bank" data-message="The question bank section will open here when the content system is connected.">Open</button></article>
+  </div></section>
+  <section class="mobile-section"><h2>Featured Reviewers</h2><div class="mobile-grid">
+    <article class="mobile-tile"><h3>General Education Reviewer</h3><p>Build your foundation across core subjects.</p><button class="mobile-action" data-title="General Education Reviewer" data-message="This reviewer card is clickable. Its lessons and questions still need to be added.">View Reviewer</button></article>
+    <article class="mobile-tile"><h3>Professional Education Reviewer</h3><p>Study teaching principles and practices.</p><button class="mobile-action" data-title="Professional Education Reviewer" data-message="This reviewer card is clickable. Its lessons and questions still need to be added.">View Reviewer</button></article>
+    <article class="mobile-tile"><h3>Major in Science Reviewer</h3><p>Prepare for your specialization.</p><button class="mobile-action" data-title="Major in Science Reviewer" data-message="This reviewer card is clickable. Its lessons and questions still need to be added.">View Reviewer</button></article>
+    <article class="mobile-tile"><h3>All Reviewers</h3><p>Browse the full reviewer catalog.</p><button class="mobile-action" data-title="All Reviewers" data-message="The full reviewer catalog will be displayed here.">View All</button></article>
+  </div></section>
+  <section class="mobile-section"><div class="mobile-feature"><h3>Practice Test</h3><p>Test your knowledge with high-quality practice questions, instant results, and detailed explanations.</p><button class="mobile-action" data-title="Practice Test" data-message="Practice tests will include questions, scoring, and explanations after the exam module is built.">Start Practicing</button></div><div class="mobile-feature dark"><h3>Mock Examination</h3><p>Experience the real LET exam with timed mock exams and performance feedback.</p><button class="mobile-action" data-title="Mock Examination" data-message="Mock exams will include timed sessions and performance feedback after the exam module is built.">Take a Mock Exam</button></div></section>
+  <section class="mobile-section"><div class="mobile-grid">
+    <article class="mobile-tile"><h3>Track Your Learning Progress</h3><p>Monitor your performance and improve with targeted practice.</p><button class="mobile-action" data-title="Learning Dashboard" data-message="A signed-in student's progress and scores will appear here.">View Dashboard</button></article>
+    <article class="mobile-tile"><h3>Meet Your AI Tutor</h3><p>Get instant help, ask questions, and learn better with an AI Tutor.</p><button class="mobile-action" data-title="AI Tutor" data-message="The AI Tutor interface will be connected after its approved learning sources and backend are set up.">Ask the AI Tutor</button></article>
+  </div></section>
+  <section class="mobile-section"><article class="mobile-tile"><h2>Latest Updates &amp; Resources</h2><p>PRC Announces LET Schedule for 2026</p><p>LET Review Tips for First-Time Takers</p><p>Downloadable Study Materials</p><button class="mobile-action" data-title="Latest Updates and Resources" data-message="Announcements and study resources will be managed from the admin area.">View All Updates</button></article></section>
+  <footer class="mobile-footer"><strong>SagotKita</strong><p>Trusted and verified content, aligned with PRC standards and LET syllabi.</p><div class="mobile-footer-links"><button class="mobile-action" data-title="About SagotKita" data-message="This page will contain information about the SagotKita project.">About</button><button class="mobile-action" data-title="Contact" data-message="Contact information will be added here.">Contact</button><button class="mobile-action" data-title="Privacy Policy" data-message="The privacy policy page will be added before public launch.">Privacy</button><button class="mobile-action" data-title="Terms and Conditions" data-message="The terms and conditions page will be added before public launch.">Terms</button><button class="mobile-action" data-title="Editorial Policy" data-message="The editorial policy page will explain how review content is checked.">Editorial</button><button class="mobile-action" data-title="Disclaimer" data-message="The disclaimer page will be added before public launch.">Disclaimer</button></div><p>© 2026 SagotKita. All rights reserved.</p></footer>
+</div>
+
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
 <section class="modal"><button class="close" aria-label="Close" id="close">×</button><h2 id="modal-title">SagotKita</h2><p id="modal-message"></p><button class="ok" id="ok">Got it</button></section>
 </div>
@@ -95,7 +174,7 @@ const title=document.getElementById('modal-title');
 const message=document.getElementById('modal-message');
 function showModal(t,m){title.textContent=t;message.textContent=m;modal.classList.add('open');}
 function hideModal(){modal.classList.remove('open');}
-document.querySelectorAll('.hotspot').forEach(button=>button.addEventListener('click',()=>showModal(button.dataset.title,button.dataset.message)));
+document.querySelectorAll('.hotspot, .mobile-action').forEach(button=>button.addEventListener('click',()=>showModal(button.dataset.title,button.dataset.message)));
 document.getElementById('close').addEventListener('click',hideModal);
 document.getElementById('ok').addEventListener('click',hideModal);
 modal.addEventListener('click',e=>{if(e.target===modal)hideModal()});
