@@ -119,18 +119,132 @@ let activeQuestions=[],questionIndex=0,score=0,answered=false,activeSubject='',a
 const subjectNames={general:'General Education',professional:'Professional Education',science:'Science Major'};
 const subjectKeys={general:'General Education',professional:'Professional Education',science:'Science Major'};
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+
 function openPracticeTest(){
   title.textContent='LET Practice Test';
-  description.textContent='Choose a subject to begin. Questions are loaded from the SagotKita question bank.';
-  body.innerHTML=`<div class="quiz-intro"><strong>How it works</strong><p style="margin:5px 0 0">Answer each question, review the explanation after submitting, and see your score at the end.</p></div><div class="quiz-subjects">
-    <button class="quiz-subject" data-subject="general"><span>📘 General Education<small>Language, Mathematics, Science, and Civics</small></span><span>›</span></button>
-    <button class="quiz-subject" data-subject="professional"><span>🎓 Professional Education<small>Teaching principles and assessment</small></span><span>›</span></button>
-    <button class="quiz-subject" data-subject="science"><span>🧪 Science Major<small>Biology, chemistry, and physics</small></span><span>›</span></button>
-  </div><div class="quiz-note">Answer keys are checked by the database and are not downloaded with the questions.</div><div class="quiz-feedback" id="loadFeedback" aria-live="polite"></div>`;
-  body.querySelectorAll('[data-subject]').forEach(button=>button.addEventListener('click',()=>startQuiz(button.dataset.subject)));
-  backdrop.classList.add('open');document.getElementById('modalClose').focus();
+  description.textContent='Choose your LET examination level.';
+  body.innerHTML=`
+    <div class="quiz-intro">
+      <strong>Choose your examination level</strong>
+      <p style="margin:5px 0 0">Select the LET level you are preparing for.</p>
+    </div>
+    <div class="quiz-subjects">
+      <button class="quiz-subject" data-level="Elementary">
+        <span>📘 Elementary LET<small>Elementary examination</small></span><span>›</span>
+      </button>
+      <button class="quiz-subject" data-level="Secondary">
+        <span>🎓 Secondary LET<small>Secondary examination</small></span><span>›</span>
+      </button>
+    </div>
+    <div class="quiz-feedback" id="loadFeedback" aria-live="polite"></div>
+  `;
+  body.querySelectorAll('[data-level]').forEach(button=>{
+    button.addEventListener('click',()=>showPracticeComponents(button.dataset.level));
+  });
+  backdrop.classList.add('open');
+  document.getElementById('modalClose').focus();
 }
-async function startQuiz(subject){
+
+function showPracticeComponents(level){
+  activeExamLevel=level;
+  title.textContent=level+' LET';
+  description.textContent='Choose an examination component.';
+  body.innerHTML=`
+    <div class="quiz-intro"><strong>Select a component</strong></div>
+    <div class="quiz-subjects">
+      <button class="quiz-subject" data-component="General Education">
+        <span>📘 General Education<small>Filipino, English, Mathematics, Science and Social Studies</small></span><span>›</span>
+      </button>
+      <button class="quiz-subject" data-component="Professional Education">
+        <span>🎓 Professional Education<small>Teaching principles, learning and assessment</small></span><span>›</span>
+      </button>
+      <button class="quiz-subject" data-component="Major/Specialization">
+        <span>📚 Major / Specialization<small>Applicable specialization subjects</small></span><span>›</span>
+      </button>
+    </div>
+    <button class="btn btn-secondary" id="backLevel" type="button">Back</button>
+  `;
+  body.querySelectorAll('[data-component]').forEach(button=>{
+    button.addEventListener('click',()=>showPracticeCategories(button.dataset.component));
+  });
+  document.getElementById('backLevel').addEventListener('click',openPracticeTest);
+}
+
+function showPracticeCategories(component){
+  activeSubject=component;
+  title.textContent=component;
+  description.textContent='Choose a subject area.';
+  const categories=component==='General Education'
+    ? ['Filipino','English','Mathematics','Science','Social Studies']
+    : component==='Professional Education'
+      ? ['Teaching Profession','Principles of Teaching','Educational Technology','Assessment of Learning','Child and Adolescent Development']
+      : ['Choose your applicable Major / Specialization'];
+
+  body.innerHTML=`
+    <div class="quiz-intro"><strong>Select a subject</strong></div>
+    <div class="quiz-subjects">
+      ${categories.map(category=>`
+        <button class="quiz-subject" data-category="${escapeHtml(category)}">
+          <span>📖 ${escapeHtml(category)}</span><span>›</span>
+        </button>
+      `).join('')}
+    </div>
+    <button class="btn btn-secondary" id="backComponent" type="button">Back</button>
+  `;
+  body.querySelectorAll('[data-category]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const category=button.dataset.category;
+      if(category.startsWith('Choose your applicable')){
+        showPracticeTopics(component,category);
+      }else{
+        activeCategory=category;
+        showPracticeTopics(component,category);
+      }
+    });
+  });
+  document.getElementById('backComponent').addEventListener('click',()=>showPracticeComponents(activeExamLevel));
+}
+
+function showPracticeTopics(component,category){
+  activeCategory=category;
+  activeTopic='';
+  title.textContent=category;
+  description.textContent='Choose a topic or practice all available topics.';
+  const topics=category==='Filipino'
+    ? ['Wika at Gramatika','Pagbasa at Pag-unawa','Panitikan','Komunikasyon']
+    : category==='English'
+      ? ['Grammar','Reading Comprehension','Vocabulary','Literature']
+      : category==='Mathematics'
+        ? ['Number Concepts','Algebra','Geometry','Statistics']
+        : category==='Science'
+          ? ['Biology','Chemistry','Physics','Earth Science']
+          : category==='Social Studies'
+            ? ['Philippine History','Geography','Economics','Civics']
+            : ['Foundations of Education','Teaching Strategies','Learning Assessment','Educational Psychology'];
+
+  body.innerHTML=`
+    <div class="quiz-intro"><strong>Select a topic</strong></div>
+    <div class="quiz-subjects">
+      <button class="quiz-subject" data-topic="">
+        <span>📚 All available topics<small>Mixed practice for this subject</small></span><span>›</span>
+      </button>
+      ${topics.map(topic=>`
+        <button class="quiz-subject" data-topic="${escapeHtml(topic)}">
+          <span>📖 ${escapeHtml(topic)}</span><span>›</span>
+        </button>
+      `).join('')}
+    </div>
+    <button class="btn btn-secondary" id="backCategory" type="button">Back</button>
+  `;
+  body.querySelectorAll('[data-topic]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      activeTopic=button.dataset.topic;
+      startQuiz(component);
+    });
+  });
+  document.getElementById('backCategory').addEventListener('click',()=>showPracticeCategories(component));
+}
+
   activeSubject=subject;questionIndex=0;score=0;answered=false;activeQuestions=[];
   title.textContent=subjectNames[subject]+' Practice';description.textContent='Loading questions…';
   body.innerHTML='<p role="status">Loading questions from the question bank…</p>';
