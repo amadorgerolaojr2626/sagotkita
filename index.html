@@ -245,27 +245,49 @@ function showPracticeTopics(component,category){
   document.getElementById('backCategory').addEventListener('click',()=>showPracticeCategories(component));
 }
 
-  activeSubject=subject;questionIndex=0;score=0;answered=false;activeQuestions=[];
-  title.textContent=subjectNames[subject]+' Practice';description.textContent='Loading questions…';
+  
+async function startQuiz(subject){
+  activeSubject=subject;
+  questionIndex=0;
+  score=0;
+  answered=false;
+  activeQuestions=[];
+
+  title.textContent=subject+' Practice';
+  description.textContent='Loading questions…';
   body.innerHTML='<p role="status">Loading questions from the question bank…</p>';
+
   try{
-   const {data,error}=await supabaseClient.rpc('get_practice_questions_filtered',{
-  p_exam_level:null,
-  p_subject:subjectKeys[subject],
-  p_category:null,
-  p_topic:null,
-  p_limit:20
-});
+    const {data,error}=await supabaseClient.rpc('get_practice_questions_filtered',{
+      p_exam_level:activeExamLevel || null,
+      p_subject:activeSubject,
+      p_category:activeCategory || null,
+      p_topic:activeTopic || null,
+      p_limit:20
+    });
+
     if(error)throw error;
-    if(!Array.isArray(data)||data.length===0){body.innerHTML='<div class="quiz-intro">No questions are available for this subject yet. Please try another subject later.</div><button class="btn btn-secondary" id="backSubjects" type="button">Choose Subject</button>';document.getElementById('backSubjects').addEventListener('click',openPracticeTest);return}
-    activeQuestions=data.map(row=>({id:row.id,q:row.question,c:[row.choice_a,row.choice_b,row.choice_c,row.choice_d]}));
+
+    if(!Array.isArray(data)||data.length===0){
+      body.innerHTML='<div class="quiz-intro">No questions are available for this selection yet.</div><button class="btn btn-secondary" id="backSubjects" type="button">Choose Subject</button>';
+      document.getElementById('backSubjects').addEventListener('click',openPracticeTest);
+      return;
+    }
+
+    activeQuestions=data.map(row=>({
+      id:row.id,
+      q:row.question,
+      c:[row.choice_a,row.choice_b,row.choice_c,row.choice_d]
+    }));
+
     renderQuestion();
+
   }catch(error){
     body.innerHTML=`<div class="quiz-feedback show wrong">Could not load questions. ${escapeHtml(error.message||'Please try again.')}</div><button class="btn btn-secondary" id="backSubjects" type="button">Back</button>`;
     document.getElementById('backSubjects').addEventListener('click',openPracticeTest);
   }
 }
-function renderQuestion(){
+
   const q=activeQuestions[questionIndex];
   body.innerHTML=`<div class="quiz-meta"><span>Question ${questionIndex+1} of ${activeQuestions.length}</span><span>Score: ${score}</span></div><div class="quiz-progress"><span style="width:${(questionIndex/activeQuestions.length)*100}%"></span></div><div class="quiz-question">${escapeHtml(q.q)}</div><div class="quiz-choices">${q.c.map((choice,i)=>`<button class="quiz-choice" type="button" data-answer="${i}">${String.fromCharCode(65+i)}. ${escapeHtml(choice)}</button>`).join('')}</div><div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div><div class="quiz-actions"><button class="btn btn-secondary" id="exitQuiz" type="button">Exit quiz</button><button class="btn btn-primary" id="nextQuestion" type="button" disabled>${questionIndex===activeQuestions.length-1?'See Results':'Next Question'}</button></div><div class="quiz-note">Select one answer. Your answer cannot be changed after submission.</div>`;
   body.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>selectAnswer(Number(button.dataset.answer))));
