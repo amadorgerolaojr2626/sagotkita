@@ -135,7 +135,13 @@ async function startQuiz(subject){
   title.textContent=subjectNames[subject]+' Practice';description.textContent='Loading questions…';
   body.innerHTML='<p role="status">Loading questions from the question bank…</p>';
   try{
-    const {data,error}=await supabaseClient.rpc('get_practice_questions',{p_subject:subjectKeys[subject],p_limit:50});
+   const {data,error}=await supabaseClient.rpc('get_practice_questions_filtered',{
+  p_exam_level:null,
+  p_subject:subjectKeys[subject],
+  p_category:null,
+  p_topic:null,
+  p_limit:20
+});
     if(error)throw error;
     if(!Array.isArray(data)||data.length===0){body.innerHTML='<div class="quiz-intro">No questions are available for this subject yet. Please try another subject later.</div><button class="btn btn-secondary" id="backSubjects" type="button">Choose Subject</button>';document.getElementById('backSubjects').addEventListener('click',openPracticeTest);return}
     activeQuestions=data.map(row=>({id:row.id,q:row.question,c:[row.choice_a,row.choice_b,row.choice_c,row.choice_d]}));
